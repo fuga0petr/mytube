@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="site-title">MyTube</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Nunito:wght@300;400;600;700;800&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* =====================================================
+       CSS VARIABLES — all colours/sizes driven from here
+    ===================================================== */
+    :root {
+      --accent:        #ff0000;
+      --accent-glow:   rgba(255,0,0,.35);
+      --accent2:       #ff4444;
+      --bg-primary:    #0f0f0f;
+      --bg-secondary:  #181818;
+      --bg-tertiary:   #212121;
+      --bg-card:       #1a1a1a;
+      --bg-hover:      #272727;
+      --text-primary:  #f1f1f1;
+      --text-secondary:#aaaaaa;
+      --text-muted:    #717171;
+      --border:        #303030;
+      --shadow:        0 4px 24px rgba(0,0,0,.5);
+      --radius:        12px;
+      --radius-sm:     8px;
+      --radius-xs:     4px;
+      --sidebar-width: 240px;
+      --navbar-h:      56px;
+      --font:          'Roboto', sans-serif;
+      --font-size:     14px;
+      --transition:    .2s ease;
+      --blur:          blur(16px);
+      --card-gap:      16px;
+      --scrollbar-w:   6px;
+      --glass:         rgba(255,255,255,.05);
+    }
+
+    /* LIGHT THEME */
+    [data-theme="light"] {
+      --bg-primary:   #ffffff;
+      --bg-secondary: #f2f2f2;
+      --bg-tertiary:  #e5e5e5;
+      --bg-card:      #f9f9f9;
+      --bg-hover:     #e8e8e8;
+      --text-primary: #0f0f0f;
+      --text-secondary:#606060;
+      --text-muted:   #909090;
+      --border:       #e0e0e0;
+      --shadow:       0 4px 24px rgba(0,0,0,.12);
+      --glass:        rgba(0,0,0,.04);
+    }
+
+    /* AMOLED THEME */
+    [data-theme="amoled"] {
+      --bg-primary:   #000000;
+      --bg-secondary: #080808;
+      --bg-tertiary:  #101010;
+      --bg-card:      #050505;
+      --bg-hover:     #141414;
+      --border:       #1a1a1a;
+    }
+
+    /* =====================================================
+       RESET & BASE
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: var(--font-size);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: var(--scrollbar-w); height: var(--scrollbar-w); }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; outline: none; background: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; outline: none; }
+    img { display: block; }
+
+    /* =====================================================
+       NAVBAR
+    ===================================================== */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      height: var(--navbar-h);
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 16px; gap: 16px;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    #navbar.glass-nav {
+      background: rgba(15,15,15,.75);
+      backdrop-filter: var(--blur);
+    }
+    [data-theme="light"] #navbar.glass-nav {
+      background: rgba(255,255,255,.75);
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .hamburger-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); transition: background var(--transition);
+    }
+    .hamburger-btn:hover { background: var(--bg-hover); }
+
+    #logo {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 20px; font-weight: 700; letter-spacing: -.5px;
+      user-select: none;
+    }
+    #logo .logo-icon {
+      width: 32px; height: 22px; background: var(--accent);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition), box-shadow var(--transition);
+    }
+    #logo .logo-icon svg { width: 14px; height: 14px; fill: white; }
+    #logo .logo-text { color: var(--text-primary); }
+    #logo .logo-text span { color: var(--accent); }
+    #logo:hover .logo-icon { box-shadow: 0 0 12px var(--accent-glow); }
+
+    .nav-center { flex: 1; display: flex; align-items: center; gap: 8px; max-width: 720px; margin: 0 auto; }
+
+    #search-bar {
+      flex: 1; display: flex; align-items: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 24px; overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    #search-bar:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+    #search-bar input {
+      flex: 1; padding: 8px 16px;
+      background: transparent; color: var(--text-primary);
+      font-size: 15px; border: none;
+    }
+    #search-bar input::placeholder { color: var(--text-muted); }
+    #search-btn {
+      width: 64px; height: 38px;
+      background: var(--bg-tertiary); color: var(--text-secondary);
+      border-left: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition), color var(--transition);
+    }
+    #search-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .mic-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); transition: background var(--transition);
+      flex-shrink: 0;
+    }
+    .mic-btn:hover { background: var(--bg-hover); }
+
+    .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .nav-icon-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-primary); position: relative;
+      transition: background var(--transition);
+    }
+    .nav-icon-btn:hover { background: var(--bg-hover); }
+    .notif-badge {
+      position: absolute; top: 4px; right: 4px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); color: white; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #settings-trigger {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 20px;
+      background: var(--accent); color: white; font-weight: 600; font-size: 13px;
+      transition: opacity var(--transition), box-shadow var(--transition);
+    }
+    #settings-trigger:hover { opacity: .9; box-shadow: 0 0 14px var(--accent-glow); }
+
+    /* =====================================================
+       SIDEBAR
+    ===================================================== */
+    #sidebar {
+      position: fixed; top: var(--navbar-h); left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--bg-primary);
+      overflow-y: auto; overflow-x: hidden;
+      padding: 12px 0;
+      transition: transform var(--transition), width var(--transition), background var(--transition);
+      z-index: 900;
+    }
+    #sidebar.collapsed { width: 72px; }
+    #sidebar.hidden { transform: translateX(-100%); }
+
+    .sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .sidebar-section:last-child { border-bottom: none; }
+    .sidebar-label {
+      padding: 8px 16px 4px;
+      font-size: 11px; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: .8px;
+    }
+    #sidebar.collapsed .sidebar-label { display: none; }
+
+    .sidebar-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 10px 16px; border-radius: var(--radius-sm); margin: 2px 8px;
+      color: var(--text-primary); font-size: 14px; font-weight: 400;
+      transition: background var(--transition), color var(--transition);
+      cursor: pointer; white-space: nowrap; overflow: hidden;
+    }
+    .sidebar-item:hover { background: var(--bg-hover); }
+    .sidebar-item.active { background: var(--bg-tertiary); font-weight: 600; }
+    .sidebar-item .s-icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .sidebar-item .s-label { transition: opacity var(--transition); }
+    #sidebar.collapsed .sidebar-item .s-label { opacity: 0; width: 0; overflow: hidden; }
+    #sidebar.collapsed .sidebar-item { gap: 0; justify-content: center; padding: 10px; }
+
+    /* =====================================================
+       MAIN CONTENT
+    ===================================================== */
+    #main {
+      margin-left: var(--sidebar-width);
+      margin-top: var(--navbar-h);
+      padding: 24px;
+      min-height: calc(100vh - var(--navbar-h));
+      transition: margin-left var(--transition);
+    }
+    #main.sidebar-collapsed { margin-left: 72px; }
+    #main.sidebar-hidden { margin-left: 0; }
+
+    /* =====================================================
+       CHIPS / FILTERS
+    ===================================================== */
+    #chips-bar {
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;
+      margin-bottom: 20px; scroll-behavior: smooth;
+    }
+    #chips-bar::-webkit-scrollbar { height: 3px; }
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      background: var(--bg-tertiary); color: var(--text-primary);
+      white-space: nowrap; cursor: pointer; flex-shrink: 0;
+      transition: background var(--transition), color var(--transition);
+    }
+    .chip:hover { background: var(--bg-hover); }
+    .chip.active { background: var(--text-primary); color: var(--bg-primary); }
+
+    /* =====================================================
+       VIDEO GRID
+    ===================================================== */
+    #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--card-gap);
+    }
+
+    /* Compact layout */
+    #video-grid.layout-compact {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    /* List layout */
+    #video-grid.layout-list {
+      grid-template-columns: 1fr;
+    }
+    #video-grid.layout-list .video-card {
+      flex-direction: row; max-width: 100%;
+    }
+    #video-grid.layout-list .thumb-wrap {
+      width: 240px; flex-shrink: 0;
+    }
+    #video-grid.layout-list .video-info { padding: 0 12px; }
+
+    .video-card {
+      display: flex; flex-direction: column;
+      border-radius: var(--radius); overflow: hidden;
+      cursor: pointer; transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .video-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+
+    .thumb-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background: var(--bg-tertiary); overflow: hidden; border-radius: var(--radius);
+    }
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s ease; }
+    .video-card:hover .thumb-wrap img { transform: scale(1.04); }
+
+    .thumb-duration {
+      position: absolute; bottom: 6px; right: 6px;
+      background: rgba(0,0,0,.85); color: white;
+      padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600;
+    }
+    .thumb-progress {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px; background: rgba(255,255,255,.2);
+    }
+    .thumb-progress-bar { height: 100%; background: var(--accent); }
+
+    .video-info {
+      display: flex; gap: 10px; padding: 10px 4px 4px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; color: white;
+      transition: box-shadow var(--transition);
+    }
+    .video-card:hover .avatar { box-shadow: 0 0 10px var(--accent-glow); }
+    .video-meta { flex: 1; min-width: 0; }
+    .video-title {
+      font-size: 14px; font-weight: 600; line-height: 1.4;
+      color: var(--text-primary);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .video-channel { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+    .video-stats { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .video-badge {
+      display: inline-block; padding: 1px 5px; border-radius: 3px;
+      font-size: 10px; font-weight: 700; margin-left: 4px; vertical-align: middle;
+      background: var(--accent); color: white;
+    }
+
+    /* =====================================================
+       SOURCE BANNER
+    ===================================================== */
+    #source-banner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; border-radius: var(--radius);
+      background: var(--bg-card); border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    #source-banner .src-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent); color: white; font-size: 16px;
+    }
+    #source-banner .src-name { font-weight: 700; font-size: 16px; }
+    #source-banner .src-desc { font-size: 12px; color: var(--text-muted); }
+
+    /* =====================================================
+       SETTINGS MODAL
+    ===================================================== */
+    #settings-overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    #settings-overlay.open { opacity: 1; pointer-events: all; }
+
+    #settings-modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: min(700px, 95vw);
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.6);
+      transform: translateY(20px);
+      transition: transform .25s ease;
+    }
+    #settings-overlay.open #settings-modal { transform: translateY(0); }
+
+    .modal-header {
+      display: flex; align-items: center; padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 18px; font-weight: 700; flex: 1; }
+    .modal-close {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); font-size: 22px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .modal-body {
+      display: flex; flex: 1; overflow: hidden;
+    }
+
+    .modal-tabs {
+      width: 160px; flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      padding: 12px 8px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .modal-tab {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: background var(--transition), color var(--transition);
+    }
+    .modal-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .modal-tab.active { background: var(--accent); color: white; }
+
+    .modal-content {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+    }
+
+    .settings-panel { display: none; }
+    .settings-panel.active { display: block; }
+
+    .settings-section { margin-bottom: 28px; }
+    .settings-section h3 {
+      font-size: 13px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: .7px; margin-bottom: 12px;
+    }
+
+    .setting-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { flex: 1; }
+    .setting-label strong { font-size: 14px; font-weight: 500; }
+    .setting-label small { display: block; color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+
+    /* Toggle */
+    .toggle {
+      width: 44px; height: 24px; border-radius: 12px;
+      background: var(--border); position: relative; cursor: pointer;
+      transition: background var(--transition); flex-shrink: 0;
+    }
+    .toggle.on { background: var(--accent); }
+    .toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 20px; height: 20px; border-radius: 50%; background: white;
+      transition: transform var(--transition); box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+    .toggle.on::after { transform: translateX(20px); }
+
+    /* Colour picker */
+    .color-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .color-swatch {
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: border-color var(--transition), transform var(--transition);
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: var(--text-primary); }
+    .color-custom {
+      width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+      border: 3px solid var(--border); cursor: pointer;
+    }
+    .color-custom input { width: 48px; height: 48px; margin: -8px; cursor: pointer; border: none; padding: 0; }
+
+    /* Range */
+    input[type=range] {
+      -webkit-appearance: none; width: 120px; height: 4px;
+      border-radius: 2px; background: var(--border); cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    }
+
+    /* Select */
+    select {
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-tertiary); color: var(--text-primary);
+      border: 1px solid var(--border); font-size: 13px;
+      transition: border-color var(--transition);
+    }
+    select:focus { border-color: var(--accent); }
+
+    /* Text input */
+    input[type=text] {
+      padding: 7px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-tertiary); color: var(--text-primary);
+      border: 1px solid var(--border); font-size: 13px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input[type=text]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    /* Source cards */
+    .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .source-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: var(--radius);
+      border: 2px solid var(--border); cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .source-card:hover { background: var(--bg-hover); }
+    .source-card.selected { border-color: var(--accent); background: rgba(255,0,0,.06); }
+    .source-card .s-emoji { font-size: 24px; }
+    .source-card .s-info strong { font-size: 14px; }
+    .source-card .s-info small { color: var(--text-muted); font-size: 12px; }
+    .source-card .s-check {
+      margin-left: auto; width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .source-card.selected .s-check { background: var(--accent); border-color: var(--accent); }
+    .source-card.selected .s-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+
+    /* Code share */
+    .code-box {
+      display: flex; gap: 8px; align-items: stretch;
+    }
+    .code-display {
+      flex: 1; padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--text-secondary); word-break: break-all; max-height: 80px; overflow: auto;
+    }
+    .btn {
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600;
+      transition: opacity var(--transition), box-shadow var(--transition);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-accent:hover { opacity: .9; box-shadow: 0 0 12px var(--accent-glow); }
+    .btn-ghost {
+      background: transparent; color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg-hover); }
+    .btn-green { background: #2ea043; color: white; }
+    .btn-green:hover { opacity: .9; }
+    .btn-purple { background: #8b5cf6; color: white; }
+    .btn-purple:hover { opacity: .9; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+    /* Import code input */
+    #import-code-input {
+      width: 100%; padding: 8px 12px; border-radius: var(--radius-sm);
+      background: var(--bg-tertiary); color: var(--text-primary);
+      border: 1px solid var(--border); font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #import-code-input:focus { border-color: var(--accent); }
+
+    /* Toast */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px; border-radius: var(--radius);
+      background: var(--bg-tertiary); border: 1px solid var(--border);
+      box-shadow: var(--shadow); font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
+      animation: slideIn .25s ease;
+    }
+    .toast.success { border-color: #2ea043; }
+    .toast.error { border-color: var(--accent); }
+    @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(40px); opacity: 0; } }
+    .toast.hiding { animation: slideOut .25s ease forwards; }
+
+    /* =====================================================
+       SKELETON LOADER
+    ===================================================== */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite; border-radius: var(--radius-sm);
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    .skeleton-thumb { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius); }
+    .skeleton-line { height: 14px; margin: 8px 0; }
+    .skeleton-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+
+    /* =====================================================
+       CUSTOM CSS PANEL
+    ===================================================== */
+    #custom-css-input {
+      width: 100%; min-height: 120px; padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-tertiary); color: var(--text-primary);
+      border: 1px solid var(--border); font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; resize: vertical;
+    }
+    #custom-css-input:focus { border-color: var(--accent); }
+
+    /* =====================================================
+       SCROLL TO TOP
+    ===================================================== */
+    #scroll-top {
+      position: fixed; bottom: 80px; right: 24px; z-index: 800;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--accent); color: white;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px var(--accent-glow);
+      opacity: 0; pointer-events: none; transform: translateY(10px);
+      transition: opacity var(--transition), transform var(--transition);
+      font-size: 20px;
+    }
+    #scroll-top.visible { opacity: 1; pointer-events: all; transform: none; }
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.mobile-open { transform: none; }
+      #main { margin-left: 0 !important; }
+      .nav-center { max-width: 100%; }
+      #logo .logo-text { display: none; }
+      .source-grid { grid-template-columns: 1fr; }
+      .modal-tabs { width: 120px; }
+    }
+
+    /* =====================================================
+       CUSTOM CSS INJECTION AREA
+    ===================================================== */
+    #custom-style { /* injected by JS */ }
+
+    /* =====================================================
+       SPECIAL SOURCE ACCENTS
+    ===================================================== */
+    [data-source="tiktok"] { --accent: #ff0050; --accent2: #ff4080; --accent-glow: rgba(255,0,80,.35); }
+    [data-source="pornhub"] { --accent: #ff9000; --accent2: #ffa533; --accent-glow: rgba(255,144,0,.35); }
+    [data-source="rule34"] { --accent: #7c3aed; --accent2: #9f67ff; --accent-glow: rgba(124,58,237,.35); }
+    [data-source="youtube"] { --accent: #ff0000; --accent2: #ff4444; --accent-glow: rgba(255,0,0,.35); }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+    footer {
+      text-align: center; padding: 32px 24px 24px;
+      color: var(--text-muted); font-size: 12px;
+    }
+
+    /* ===================================================
+       ANIMATIONS & FUN EXTRAS
+    =================================================== */
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    .glow-text { text-shadow: 0 0 20px var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+<nav id="navbar">
+  <div class="nav-left">
+    <button class="hamburger-btn" id="hamburger-btn" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+      </svg>
+    </button>
+    <a id="logo" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M9.5 16.5l7-4.5-7-4.5v9z"/></svg>
+      </div>
+      <span class="logo-text" id="logo-text">My<span>Tube</span></span>
+    </a>
+  </div>
+
+  <div class="nav-center">
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Поиск..." />
+      <button id="search-btn" aria-label="Поиск">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 20l-5.35-5.35A7.5 7.5 0 1 0 4 10.5a7.5 7.5 0 0 0 11.65 5.65L21 20zm-10.5-4a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+        </svg>
+      </button>
+    </div>
+    <button class="mic-btn" aria-label="Голосовой поиск">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4zm6 9a1 1 0 0 0-2 0 4 4 0 0 1-8 0 1 1 0 0 0-2 0 6 6 0 0 0 5 5.91V19H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-3.09A6 6 0 0 0 18 10z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-icon-btn" title="Уведомления">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2a7 7 0 0 0-7 7v4.17l-1.7 1.7A1 1 0 0 0 4 17h16a1 1 0 0 0 .7-1.71L19 13.17V9a7 7 0 0 0-7-7zm0 20a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/>
+      </svg>
+      <span class="notif-badge">3</span>
+    </button>
+    <button class="nav-icon-btn" title="Загрузить">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+    </button>
+    <button id="settings-trigger" title="Настройки">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3a7 7 0 0 1 7 7 7 7 0 0 1-7 7 7 7 0 0 1-7-7 7 7 0 0 1 7-7zm1 2H11v5.41l3.29 3.3 1.42-1.42L13 11.59V7z"/>
+      </svg>
+      Настройки
+    </button>
+  </div>
+</nav>
+
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
+<aside id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-item active" data-chip="home">
+      <span class="s-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </span>
+      <span class="s-label">Главная</span>
+    </div>
+    <div class="sidebar-item" data-chip="shorts">
+      <span class="s-icon">⚡</span>
+      <span class="s-label">Shorts</span>
+    </div>
+    <div class="sidebar-item">
+      <span class="s-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h16v2H4V8zm0 4h10v2H4v-2zm0 4h7v2H4v-2zm18-4l-5 4V8l5 4z"/></svg>
+      </span>
+      <span class="s-label">Подписки</span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Вы</div>
+    <div class="sidebar-item">
+      <span class="s-icon">📋</span>
+      <span class="s-label">История</span>
+    </div>
+    <div class="sidebar-item">
+      <span class="s-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+      </span>
+      <span class="s-label">Сохранённое</span>
+    </div>
+    <div class="sidebar-item">
+      <span class="s-icon">👍</span>
+      <span class="s-label">Понравилось</span>
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Подписки</div>
+    <div class="sidebar-item"><span class="s-icon">🎮</span><span class="s-label">Gaming</span></div>
+    <div class="sidebar-item"><span class="s-icon">🎵</span><span class="s-label">Music</span></div>
+    <div class="sidebar-item"><span class="s-icon">🎨</span><span class="s-label">Art</span></div>
+    <div class="sidebar-item"><span class="s-icon">💻</span><span class="s-label">Tech</span></div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Информация</div>
+    <div class="sidebar-item" id="sidebar-settings-btn">
+      <span class="s-icon">⚙️</span>
+      <span class="s-label">Настройки</span>
+    </div>
+  </div>
+</aside>
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+<main id="main">
+  <!-- Source Banner -->
+  <div id="source-banner">
+    <div class="src-icon" id="src-icon">▶</div>
+    <div>
+      <div class="src-name" id="src-name">YouTube</div>
+      <div class="src-desc" id="src-desc">Видео со всего мира</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="change-source-btn" style="margin-left:auto">Сменить источник</button>
+  </div>
+
+  <!-- Chips -->
+  <div id="chips-bar"></div>
+
+  <!-- Video Grid -->
+  <div id="video-grid"></div>
+
+  <footer>
+    <p>Сделано с ❤️ · <a href="https://github.com/" target="_blank" style="color:var(--accent)">GitHub</a> · Версия 2.0</p>
+    <p style="margin-top:6px">Все настройки сохраняются локально в вашем браузере.</p>
+  </footer>
+</main>
+
+<!-- =====================================================
+     SETTINGS MODAL
+===================================================== -->
+<div id="settings-overlay">
+  <div id="settings-modal">
+    <div class="modal-header">
+      <h2>⚙️ Настройки и кастомизация</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <div class="modal-tab active" data-tab="source">📺 Источник</div>
+        <div class="modal-tab" data-tab="appearance">🎨 Внешний вид</div>
+        <div class="modal-tab" data-tab="layout">📐 Макет</div>
+        <div class="modal-tab" data-tab="custom">💻 CSS</div>
+        <div class="modal-tab" data-tab="share">📤 Поделиться</div>
+        <div class="modal-tab" data-tab="reset">🔄 Сброс</div>
+      </div>
+
+      <!-- Content Panels -->
+      <div class="modal-content">
+
+        <!-- SOURCE -->
+        <div class="settings-panel active" id="tab-source">
+          <div class="settings-section">
+            <h3>Источник видео</h3>
+            <div class="source-grid" id="source-grid">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- APPEARANCE -->
+        <div class="settings-panel" id="tab-appearance">
+          <div class="settings-section">
+            <h3>Тема</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Цветовая схема</strong></div>
+              <select id="theme-select">
+                <option value="dark">🌙 Тёмная</option>
+                <option value="light">☀️ Светлая</option>
+                <option value="amoled">⬛ AMOLED</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Стеклянный navbar</strong><small>Прозрачная навигация с размытием</small></div>
+              <div class="toggle" id="toggle-glass"></div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Анимации</strong><small>Плавные переходы и эффекты</small></div>
+              <div class="toggle" id="toggle-anim"></div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Акцентный цвет</h3>
+            <div class="color-row" id="accent-colors">
+              <!-- rendered by JS -->
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Название сайта</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Название</strong></div>
+              <input type="text" id="site-name-input" maxlength="20" style="width:140px" />
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Шрифт</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Семейство шрифтов</strong></div>
+              <select id="font-select">
+                <option value="'Roboto', sans-serif">Roboto</option>
+                <option value="'Inter', sans-serif">Inter</option>
+                <option value="'Nunito', sans-serif">Nunito</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+                <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Размер шрифта</strong></div>
+              <input type="range" id="font-size-range" min="11" max="18" step="1" />
+              <span id="font-size-val" style="font-size:12px;color:var(--text-muted);min-width:28px">14px</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Радиус скругления</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Скругление элементов</strong></div>
+              <input type="range" id="radius-range" min="0" max="24" step="2" />
+              <span id="radius-val" style="font-size:12px;color:var(--text-muted);min-width:28px">12px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- LAYOUT -->
+        <div class="settings-panel" id="tab-layout">
+          <div class="settings-section">
+            <h3>Вид сетки</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Раскладка</strong></div>
+              <select id="layout-select">
+                <option value="default">🔲 Стандарт</option>
+                <option value="compact">⬛ Компакт</option>
+                <option value="list">📋 Список</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Ширина карточек</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Мин. ширина карточки</strong></div>
+              <input type="range" id="card-width-range" min="180" max="480" step="20" />
+              <span id="card-width-val" style="font-size:12px;color:var(--text-muted);min-width:40px">300px</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Отступы</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Зазор между карточками</strong></div>
+              <input type="range" id="card-gap-range" min="4" max="40" step="4" />
+              <span id="card-gap-val" style="font-size:12px;color:var(--text-muted);min-width:28px">16px</span>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Сайдбар</h3>
+            <div class="setting-row">
+              <div class="setting-label"><strong>Автоскрытие сайдбара</strong><small>Сворачивать при старте</small></div>
+              <div class="toggle" id="toggle-sidebar-auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CUSTOM CSS -->
+        <div class="settings-panel" id="tab-custom">
+          <div class="settings-section">
+            <h3>Пользовательский CSS</h3>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Пишите любой CSS — он мгновенно применится к странице.</p>
+            <textarea id="custom-css-input" placeholder="/* Ваш CSS */&#10;body { /* ... */ }"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-accent" id="apply-css-btn">✅ Применить</button>
+              <button class="btn btn-ghost" id="clear-css-btn">🗑 Очистить</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Быстрые пресеты CSS</h3>
+            <div class="btn-row">
+              <button class="btn btn-ghost btn-sm" onclick="applyPresetCSS('neon')">🌈 Неон</button>
+              <button class="btn btn-ghost btn-sm" onclick="applyPresetCSS('retro')">📺 Ретро</button>
+              <button class="btn btn-ghost btn-sm" onclick="applyPresetCSS('minimal')">✨ Минимал</button>
+              <button class="btn btn-ghost btn-sm" onclick="applyPresetCSS('rave')">🎉 Рейв</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHARE -->
+        <div class="settings-panel" id="tab-share">
+          <div class="settings-section">
+            <h3>Код кастомизации</h3>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Скопируй код и отправь другу — он введёт его ниже для импорта твоих настроек.</p>
+            <div class="code-box">
+              <div class="code-display" id="share-code-display"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-accent" id="generate-code-btn">🔑 Сгенерировать код</button>
+              <button class="btn btn-ghost" id="copy-code-btn">📋 Копировать</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Импорт по коду</h3>
+            <input type="text" id="import-code-input" placeholder="Вставьте код кастомизации..." style="width:100%;margin-bottom:8px" />
+            <div class="btn-row">
+              <button class="btn btn-green" id="import-code-btn">📥 Импортировать</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Файл настроек</h3>
+            <div class="btn-row">
+              <button class="btn btn-purple" id="export-file-btn">💾 Экспорт .json</button>
+              <label class="btn btn-green" style="cursor:pointer">
+                📂 Импорт .json
+                <input type="file" id="import-file-input" accept=".json" style="display:none" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESET -->
+        <div class="settings-panel" id="tab-reset">
+          <div class="settings-section">
+            <h3>Сброс настроек</h3>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Это действие сотрёт все твои настройки и вернёт сайт к стандартному виду.</p>
+            <button class="btn btn-accent" id="reset-all-btn">🔴 Сбросить всё</button>
+          </div>
+          <div class="settings-section">
+            <h3>О сайте</h3>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.6">
+              Кастомизируемый видео-портал.<br>
+              Настройки хранятся в <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:3px">localStorage</code> вашего браузера.<br>
+              Делитесь кастомизацией через код или JSON-файл.
+            </p>
+          </div>
+        </div>
+
+      </div><!-- /modal-content -->
+    </div><!-- /modal-body -->
+  </div><!-- /settings-modal -->
+</div><!-- /settings-overlay -->
+
+<!-- Scroll to top -->
+<button id="scroll-top" aria-label="Наверх">↑</button>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Custom style injection -->
+<style id="custom-style"></style>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────
+   CONFIG — default settings
+───────────────────────────────────────────────────────── */
+const DEFAULTS = {
+  source:        'youtube',
+  theme:         'dark',
+  accent:        '#ff0000',
+  font:          "'Roboto', sans-serif",
+  fontSize:      14,
+  radius:        12,
+  glassNav:      true,
+  animations:    true,
+  layout:        'default',
+  cardWidth:     300,
+  cardGap:       16,
+  sidebarAuto:   false,
+  siteName:      'MyTube',
+  customCSS:     '',
+};
+
+const SOURCES = {
+  youtube: {
+    name: 'YouTube',
+    emoji: '▶️',
+    desc: 'Видео со всего мира',
+    accentOverride: null,
+    chips: ['Всё','Музыка','Игры','Кино','Технологии','Новости','Спорт','Кулинария','Путешествия','Образование'],
+    videos: () => generateVideos('youtube'),
+  },
+  tiktok: {
+    name: 'TikTok',
+    emoji: '🎵',
+    desc: 'Короткие вирусные видео',
+    accentOverride: '#ff0050',
+    chips: ['Для тебя','Подписки','Трендинг','Танцы','Юмор','Лайфхаки','Еда','Питомцы','Авто','Спорт'],
+    videos: () => generateVideos('tiktok'),
+  },
+  pornhub: {
+    name: 'PornHub',
+    emoji: '🔞',
+    desc: '18+ контент',
+    accentOverride: '#ff9000',
+    chips: ['Рекомендации','Популярное','Новое','HD','VR','Любительское','Профи','Короткое'],
+    videos: () => generateVideos('pornhub'),
+  },
+  rule34: {
+    name: 'Rule34',
+    emoji: '🎭',
+    desc: 'Если оно существует…',
+    accentOverride: '#7c3aed',
+    chips: ['Горячее','Топ','Новое','Анимации','GIF','Видео','Арт','Мультфильмы'],
+    videos: () => generateVideos('rule34'),
+  },
+};
+
+const ACCENT_PRESETS = [
+  '#ff0000','#ff4500','#ff9000','#ffcc00',
+  '#00c853','#00bfa5','#0288d1','#1565c0',
+  '#6200ea','#aa00ff','#e91e63','#ff80ab',
+];
+
+const CSS_PRESETS = {
+  neon: `/* 🌈 Неон */
+:root {
+  --bg-primary: #03001a;
+  --bg-secondary: #07003a;
+  --bg-tertiary: #0a0050;
+  --border: #3a00ff55;
+}
+#navbar { box-shadow: 0 0 30px #3a00ff55; }
+.video-card:hover .thumb-wrap { box-shadow: 0 0 20px var(--accent-glow); }
+#logo .logo-icon { animation: pulse 2s infinite; }`,
+
+  retro: `/* 📺 Ретро */
+:root {
+  --bg-primary: #1a1000;
+  --bg-secondary: #2a1800;
+  --font: 'JetBrains Mono', monospace;
+  --accent: #ffcc00;
+  --accent-glow: rgba(255,204,0,.4);
+  --border: #3a2a00;
+  --text-primary: #ffe066;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px);
+}`,
+
+  minimal: `/* ✨ Минимал */
+:root { --radius: 0px; --radius-sm: 0px; --radius-xs: 0px; --border: transparent; }
+.video-card { box-shadow: none !important; }
+#navbar { border: none; box-shadow: none; }
+.sidebar-item { border-radius: 0; }`,
+
+  rave: `/* 🎉 Рейв */
+@keyframes rainbow { 0%{--accent:#ff0000} 16%{--accent:#ff8800} 33%{--accent:#ffff00} 50%{--accent:#00ff00} 66%{--accent:#0000ff} 83%{--accent:#ff00ff} 100%{--accent:#ff0000} }
+:root { animation: rainbow 3s linear infinite; }
+.logo-icon { animation: pulse .5s infinite !important; }`,
+};
+
+/* ─────────────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────────────── */
+let cfg = {};
+let sidebarCollapsed = false;
+
+/* ─────────────────────────────────────────────────────────
+   FAKE VIDEO DATA GENERATOR
+───────────────────────────────────────────────────────── */
+const LOREM_TITLES = {
+  youtube: [
+    'Как я провёл лето в 10 странах', 'ТОП-10 трюков в редакторе кода',
+    'Готовлю идеальную пасту карбонара', 'Этот трюк изменит ваш код',
+    'Реакция на самые странные видео', 'Обзор: новый флагман 2025',
+    'Я учился рисовать 30 дней подряд', 'Дрифт на спорткаре в горах',
+    'Скрытые фишки Windows 11', 'Путешествие в Японию за 5 дней',
+    'Как инвестировать с 0 рублей', 'Секреты продуктивности х10',
+    'Строю дом из кирпичей LEGO', 'Разговор с ИИ: он ответил честно',
+    'Марафон: 42 км за 3 часа', 'Мой миллион подписчиков — правда',
+  ],
+  tiktok: [
+    'wait for it 😱', 'ты это не ожидал 💀', 'POV: понедельник',
+    'этот звук 🔥', 'как это вообще работает??', 'duet со мной',
+    'стич если осмелишься', '5 секунд и всё изменится', 'такого ты ещё не видел',
+    'лайфхак дня 🤯', 'гача-лайф be like:', 'сделай это до конца',
+    'только настоящие поймут', 'реакция: смотрю в первый раз', 'тренд 2025',
+    '1000000 просмотров за ночь',
+  ],
+  pornhub: [
+    'Горячая подборка #1', 'Самое популярное этой недели',
+    'Новые поступления HD', 'Топ рейтинг месяца', 'Эксклюзив 4K',
+    'Подборка: лучшее за год', 'Трендовое видео #42',
+    'Любительское: топ недели', 'Рекомендованное для вас',
+    'Premium highlight reel', 'Новинка от студии XYZ', 'VR-опыт нового уровня',
+    'Коллекция классики', 'Хит сезона 2025', 'Открытие месяца',
+    'Шедевр категории A+',
+  ],
+  rule34: [
+    'Персонаж из аниме X [арт]', 'Популярный мем [animated]',
+    'Фандом крест: A × B', 'Топ-тег недели [gif]',
+    'Горячая подборка [video]', 'Оригинальный арт автора Z',
+    'Коллекция: летний марафон', 'Редкий пейринг [exclusive]',
+    'Трендовый тег #2025', 'Фандом классик [HD]',
+    'Косплей-подборка', 'Арт-челлендж: финал',
+    'Лучший арт месяца', 'Новый автор — следить!',
+    'Анимация: жанр fantasy', 'Коллаб арт: топ авторов',
+  ],
+};
+
+const CHANNELS = [
+  'ProChannel','MegaCreator','VlogMaster','TechGuru','FoodLover',
+  'GameZone','MusicVibes','TravelBoy','ArtWorld','SportsPro',
+  'CoolKid','NightOwl','DailyDose','PixelArtist','CodeWizard',
+];
+
+function fmtViews(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'М просм.';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'К просм.';
+  return n + ' просм.';
+}
+function fmtDur(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+function fmtAgo(d) {
+  if (d < 60) return d + ' мин. назад';
+  if (d < 1440) return Math.floor(d/60) + ' ч. назад';
+  if (d < 10080) return Math.floor(d/1440) + ' дн. назад';
+  return Math.floor(d/10080) + ' нед. назад';
+}
+function randomInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function randItem(arr) { return arr[randomInt(0,arr.length-1)]; }
+
+function generateVideos(src) {
+  const titles = LOREM_TITLES[src] || LOREM_TITLES.youtube;
+  return Array.from({length: 20}, (_,i) => {
+    const views = randomInt(100, 50000000);
+    const dur   = randomInt(30, 3600);
+    const ago   = randomInt(5, 100000);
+    const prog  = Math.random() > .7 ? randomInt(10,90) : 0;
+    const ch    = randItem(CHANNELS);
+    return {
+      id: i,
+      title: titles[i % titles.length],
+      channel: ch,
+      views, dur, ago, prog,
+      thumb: `https://picsum.photos/seed/${src+i}/640/360`,
+      avatar: ch[0].toUpperCase(),
+      avatarColor: ACCENT_PRESETS[i % ACCENT_PRESETS.length],
+    };
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   STORAGE
+───────────────────────────────────────────────────────── */
+const STORAGE_KEY = 'mytube_cfg_v2';
+
+function loadConfig() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    cfg = Object.assign({}, DEFAULTS, saved);
+  } catch { cfg = Object.assign({}, DEFAULTS); }
+}
+
+function saveConfig() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+}
+
+/* ─────────────────────────────────────────────────────────
+   APPLY CONFIG TO DOM
+───────────────────────────────────────────────────────── */
+function applyConfig() {
+  const root = document.documentElement;
+  const body = document.body;
+
+  // Theme
+  root.setAttribute('data-theme', cfg.theme);
+
+  // Source accent
+  const src = SOURCES[cfg.source];
+  const accent = src.accentOverride || cfg.accent;
+  const hex2rgb = h => {
+    const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+    return `rgba(${r},${g},${b},.35)`;
+  };
+  root.style.setProperty('--accent', accent);
+  root.style.setProperty('--accent-glow', hex2rgb(accent));
+  root.style.setProperty('--accent2', accent);
+  root.setAttribute('data-source', cfg.source);
+
+  // Font
+  root.style.setProperty('--font', cfg.font);
+  root.style.setProperty('--font-size', cfg.fontSize + 'px');
+
+  // Radius
+  root.style.setProperty('--radius', cfg.radius + 'px');
+  root.style.setProperty('--radius-sm', Math.max(0,cfg.radius-4) + 'px');
+
+  // Card gap
+  root.style.setProperty('--card-gap', cfg.cardGap + 'px');
+
+  // Glass nav
+  document.getElementById('navbar').classList.toggle('glass-nav', cfg.glassNav);
+
+  // Animations
+  if (!cfg.animations) {
+    root.style.setProperty('--transition', '0s');
+  } else {
+    root.style.removeProperty('--transition');
+  }
+
+  // Layout
+  const grid = document.getElementById('video-grid');
+  grid.className = cfg.layout === 'default' ? '' : 'layout-' + cfg.layout;
+  if (cfg.layout === 'default') {
+    grid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${cfg.cardWidth}px, 1fr))`;
+  } else if (cfg.layout === 'compact') {
+    grid.style.gridTemplateColumns = `repeat(auto-fill, minmax(${Math.round(cfg.cardWidth*0.67)}px, 1fr))`;
+  } else {
+    grid.style.gridTemplateColumns = '1fr';
+  }
+
+  // Site name
+  document.getElementById('logo-text').innerHTML = cfg.siteName.slice(0,-2) + '<span>' + cfg.siteName.slice(-2) + '</span>';
+  document.getElementById('site-title').textContent = cfg.siteName;
+
+  // Source banner
+  document.getElementById('src-icon').textContent = src.emoji;
+  document.getElementById('src-name').textContent = src.name;
+  document.getElementById('src-desc').textContent = src.desc;
+
+  // Custom CSS
+  document.getElementById('custom-style').textContent = cfg.customCSS || '';
+
+  // Sidebar auto
+  if (cfg.sidebarAuto && !sidebarCollapsed) toggleSidebar();
+}
+
+function applyToUI() {
+  // Theme select
+  document.getElementById('theme-select').value = cfg.theme;
+  // Accent swatches
+  document.querySelectorAll('.color-swatch').forEach(sw => {
+    sw.classList.toggle('selected', sw.dataset.color === cfg.accent);
+  });
+  // Font
+  document.getElementById('font-select').value = cfg.font;
+  // Font size
+  const fsRange = document.getElementById('font-size-range');
+  fsRange.value = cfg.fontSize;
+  document.getElementById('font-size-val').textContent = cfg.fontSize + 'px';
+  // Radius
+  const rRange = document.getElementById('radius-range');
+  rRange.value = cfg.radius;
+  document.getElementById('radius-val').textContent = cfg.radius + 'px';
+  // Toggles
+  setToggle('toggle-glass', cfg.glassNav);
+  setToggle('toggle-anim', cfg.animations);
+  setToggle('toggle-sidebar-auto', cfg.sidebarAuto);
+  // Layout
+  document.getElementById('layout-select').value = cfg.layout;
+  // Card width
+  const cwRange = document.getElementById('card-width-range');
+  cwRange.value = cfg.cardWidth;
+  document.getElementById('card-width-val').textContent = cfg.cardWidth + 'px';
+  // Card gap
+  const cgRange = document.getElementById('card-gap-range');
+  cgRange.value = cfg.cardGap;
+  document.getElementById('card-gap-val').textContent = cfg.cardGap + 'px';
+  // Site name
+  document.getElementById('site-name-input').value = cfg.siteName;
+  // Custom CSS
+  document.getElementById('custom-css-input').value = cfg.customCSS || '';
+  // Source cards
+  document.querySelectorAll('.source-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.source === cfg.source);
+  });
+}
+
+function setToggle(id, state) {
+  document.getElementById(id).classList.toggle('on', !!state);
+}
+
+/* ─────────────────────────────────────────────────────────
+   RENDER CHIPS
+───────────────────────────────────────────────────────── */
+function renderChips() {
+  const bar = document.getElementById('chips-bar');
+  const chips = SOURCES[cfg.source].chips;
+  bar.innerHTML = chips.map((c,i) =>
+    `<div class="chip${i===0?' active':''}" onclick="this.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));this.classList.add('active');loadVideos()">${c}</div>`
+  ).join('');
+}
+
+/* ─────────────────────────────────────────────────────────
+   RENDER VIDEOS
+───────────────────────────────────────────────────────── */
+function showSkeletons() {
+  const grid = document.getElementById('video-grid');
+  grid.innerHTML = Array.from({length:12},()=>`
+    <div class="video-card" style="pointer-events:none">
+      <div class="skeleton skeleton-thumb"></div>
+      <div class="video-info">
+        <div class="skeleton skeleton-avatar"></div>
+        <div style="flex:1">
+          <div class="skeleton skeleton-line" style="width:90%"></div>
+          <div class="skeleton skeleton-line" style="width:65%"></div>
+          <div class="skeleton skeleton-line" style="width:40%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadVideos() {
+  showSkeletons();
+  const delay = randomInt(400, 900);
+  setTimeout(() => {
+    const videos = SOURCES[cfg.source].videos();
+    renderVideos(videos);
+  }, delay);
+}
+
+function renderVideos(videos) {
+  const grid = document.getElementById('video-grid');
+  grid.innerHTML = videos.map(v => `
+    <div class="video-card" onclick="showToast('Видео: ${v.title.replace(/'/g,'\\'').substring(0,30)}…','ℹ️')">
+      <div class="thumb-wrap">
+        <img src="${v.thumb}" alt="${v.title}" loading="lazy" />
+        <span class="thumb-duration">${fmtDur(v.dur)}</span>
+        ${v.prog ? `<div class="thumb-progress"><div class="thumb-progress-bar" style="width:${v.prog}%"></div></div>` : ''}
+      </div>
+      <div class="video-info">
+        <div class="avatar" style="background:${v.avatarColor}">${v.avatar}</div>
+        <div class="video-meta">
+          <div class="video-title">${v.title}</div>
+          <div class="video-channel">${v.channel}</div>
+          <div class="video-stats">${fmtViews(v.views)} · ${fmtAgo(v.ago)}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─────────────────────────────────────────────────────────
+   RENDER SOURCE CARDS
+───────────────────────────────────────────────────────── */
+function renderSourceCards() {
+  document.getElementById('source-grid').innerHTML = Object.entries(SOURCES).map(([k,s]) => `
+    <div class="source-card${cfg.source===k?' selected':''}" data-source="${k}" onclick="selectSource('${k}')">
+      <span class="s-emoji">${s.emoji}</span>
+      <div class="s-info"><strong>${s.name}</strong><br><small>${s.desc}</small></div>
+      <div class="s-check"></div>
+    </div>
+  `).join('');
+}
+
+function selectSource(key) {
+  cfg.source = key;
+  saveConfig();
+  applyConfig();
+  renderChips();
+  loadVideos();
+  renderSourceCards();
+  applyToUI();
+  showToast(`Источник: ${SOURCES[key].name}`, SOURCES[key].emoji);
+}
+
+/* ─────────────────────────────────────────────────────────
+   RENDER ACCENT SWATCHES
+───────────────────────────────────────────────────────── */
+function renderAccentSwatches() {
+  const container = document.getElementById('accent-colors');
+  container.innerHTML = ACCENT_PRESETS.map(c => `
+    <div class="color-swatch${cfg.accent===c?' selected':''}" data-color="${c}"
+         style="background:${c}" title="${c}" onclick="setAccent('${c}')"></div>
+  `).join('') + `
+    <div class="color-custom" title="Свой цвет">
+      <input type="color" id="accent-custom-picker" value="${cfg.accent}" oninput="setAccent(this.value)" />
+    </div>`;
+}
+
+function setAccent(color) {
+  cfg.accent = color;
+  saveConfig();
+  applyConfig();
+  renderAccentSwatches();
+}
+
+/* ─────────────────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────────────────── */
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const main = document.getElementById('main');
+  if (window.innerWidth <= 768) {
+    sb.classList.toggle('mobile-open');
+    return;
+  }
+  sidebarCollapsed = !sidebarCollapsed;
+  sb.classList.toggle('collapsed', sidebarCollapsed);
+  main.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+}
+
+/* ─────────────────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────────────────── */
+function showToast(msg, icon='✅', type='') {
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.innerHTML = `<span>${icon}</span> ${msg}`;
+  tc.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('hiding');
+    setTimeout(() => t.remove(), 300);
+  }, 3000);
+}
+
+/* ─────────────────────────────────────────────────────────
+   SETTINGS MODAL
+───────────────────────────────────────────────────────── */
+function openSettings(tab) {
+  const overlay = document.getElementById('settings-overlay');
+  overlay.classList.add('open');
+  if (tab) switchTab(tab);
+  applyToUI();
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.settings-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+}
+
+/* ─────────────────────────────────────────────────────────
+   EXPORT / IMPORT
+───────────────────────────────────────────────────────── */
+function generateShareCode() {
+  const payload = btoa(unescape(encodeURIComponent(JSON.stringify(cfg))));
+  // chunk into readable groups
+  const code = 'MT2:' + payload.replace(/(.{8})/g,'$1-').replace(/-$/,'');
+  document.getElementById('share-code-display').textContent = code;
+  return code;
+}
+
+function copyCode() {
+  const code = document.getElementById('share-code-display').textContent;
+  if (!code || code === 'Нажми «Сгенерировать»') {
+    showToast('Сначала сгенерируй код!', '⚠️', 'error');
+    return;
+  }
+  navigator.clipboard.writeText(code).then(() => showToast('Код скопирован!', '📋'));
+}
+
+function importFromCode() {
+  const raw = document.getElementById('import-code-input').value.trim();
+  if (!raw.startsWith('MT2:')) {
+    showToast('Неверный формат кода!', '❌', 'error'); return;
+  }
+  try {
+    const b64 = raw.slice(4).replace(/-/g,'');
+    const obj = JSON.parse(decodeURIComponent(escape(atob(b64))));
+    cfg = Object.assign({}, DEFAULTS, obj);
+    saveConfig();
+    applyConfig();
+    renderChips();
+    loadVideos();
+    renderSourceCards();
+    applyToUI();
+    showToast('Настройки импортированы!', '✅');
+  } catch {
+    showToast('Ошибка при разборе кода!', '❌', 'error');
+  }
+}
+
+function exportToFile() {
+  const blob = new Blob([JSON.stringify(cfg, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mytube-settings.json';
+  a.click();
+  showToast('Файл сохранён!', '💾');
+}
+
+function importFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      cfg = Object.assign({}, DEFAULTS, obj);
+      saveConfig();
+      applyConfig();
+      renderChips();
+      loadVideos();
+      renderSourceCards();
+      applyToUI();
+      showToast('Файл импортирован!', '📂');
+    } catch {
+      showToast('Ошибка чтения файла!', '❌', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ─────────────────────────────────────────────────────────
+   CSS PRESETS
+───────────────────────────────────────────────────────── */
+function applyPresetCSS(name) {
+  const css = CSS_PRESETS[name] || '';
+  document.getElementById('custom-css-input').value = css;
+  cfg.customCSS = css;
+  saveConfig();
+  document.getElementById('custom-style').textContent = css;
+  showToast('Пресет «' + name + '» применён!', '🎨');
+}
+
+/* ─────────────────────────────────────────────────────────
+   INIT & EVENTS
+───────────────────────────────────────────────────────── */
+function init() {
+  loadConfig();
+  renderSourceCards();
+  renderAccentSwatches();
+  applyConfig();
+  applyToUI();
+  renderChips();
+  loadVideos();
+
+  // Hamburger
+  document.getElementById('hamburger-btn').addEventListener('click', toggleSidebar);
+
+  // Settings triggers
+  document.getElementById('settings-trigger').addEventListener('click', () => openSettings('appearance'));
+  document.getElementById('sidebar-settings-btn').addEventListener('click', () => openSettings('source'));
+  document.getElementById('change-source-btn').addEventListener('click', () => openSettings('source'));
+  document.getElementById('modal-close').addEventListener('click', closeSettings);
+  document.getElementById('settings-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('settings-overlay')) closeSettings();
+  });
+
+  // Tabs
+  document.querySelectorAll('.modal-tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+
+  // Theme select
+  document.getElementById('theme-select').addEventListener('change', function() {
+    cfg.theme = this.value; saveConfig(); applyConfig();
+  });
+
+  // Font select
+  document.getElementById('font-select').addEventListener('change', function() {
+    cfg.font = this.value; saveConfig(); applyConfig();
+  });
+
+  // Font size range
+  document.getElementById('font-size-range').addEventListener('input', function() {
+    cfg.fontSize = +this.value;
+    document.getElementById('font-size-val').textContent = this.value + 'px';
+    saveConfig(); applyConfig();
+  });
+
+  // Radius range
+  document.getElementById('radius-range').addEventListener('input', function() {
+    cfg.radius = +this.value;
+    document.getElementById('radius-val').textContent = this.value + 'px';
+    saveConfig(); applyConfig();
+  });
+
+  // Layout
+  document.getElementById('layout-select').addEventListener('change', function() {
+    cfg.layout = this.value; saveConfig(); applyConfig();
+  });
+
+  // Card width
+  document.getElementById('card-width-range').addEventListener('input', function() {
+    cfg.cardWidth = +this.value;
+    document.getElementById('card-width-val').textContent = this.value + 'px';
+    saveConfig(); applyConfig();
+  });
+
+  // Card gap
+  document.getElementById('card-gap-range').addEventListener('input', function() {
+    cfg.cardGap = +this.value;
+    document.getElementById('card-gap-val').textContent = this.value + 'px';
+    saveConfig(); applyConfig();
+  });
+
+  // Toggles
+  ['toggle-glass','toggle-anim','toggle-sidebar-auto'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function() {
+      this.classList.toggle('on');
+      const map = {'toggle-glass':'glassNav','toggle-anim':'animations','toggle-sidebar-auto':'sidebarAuto'};
+      cfg[map[id]] = this.classList.contains('on');
+      saveConfig(); applyConfig();
+    });
+  });
+
+  // Site name
+  document.getElementById('site-name-input').addEventListener('input', function() {
+    cfg.siteName = this.value || 'MyTube';
+    saveConfig(); applyConfig();
+  });
+
+  // Custom CSS
+  document.getElementById('apply-css-btn').addEventListener('click', () => {
+    cfg.customCSS = document.getElementById('custom-css-input').value;
+    saveConfig();
+    document.getElementById('custom-style').textContent = cfg.customCSS;
+    showToast('CSS применён!', '💻');
+  });
+  document.getElementById('clear-css-btn').addEventListener('click', () => {
+    document.getElementById('custom-css-input').value = '';
+    cfg.customCSS = '';
+    saveConfig();
+    document.getElementById('custom-style').textContent = '';
+    showToast('CSS очищен!', '🗑');
+  });
+
+  // Share
+  document.getElementById('share-code-display').textContent = 'Нажми «Сгенерировать»';
+  document.getElementById('generate-code-btn').addEventListener('click', generateShareCode);
+  document.getElementById('copy-code-btn').addEventListener('click', copyCode);
+  document.getElementById('import-code-btn').addEventListener('click', importFromCode);
+
+  // File export/import
+  document.getElementById('export-file-btn').addEventListener('click', exportToFile);
+  document.getElementById('import-file-input').addEventListener('change', function() {
+    if (this.files[0]) importFromFile(this.files[0]);
+  });
+
+  // Reset
+  document.getElementById('reset-all-btn').addEventListener('click', () => {
+    if (!confirm('Сбросить все настройки?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    cfg = Object.assign({}, DEFAULTS);
+    sidebarCollapsed = false;
+    document.getElementById('sidebar').classList.remove('collapsed','mobile-open');
+    document.getElementById('main').classList.remove('sidebar-collapsed','sidebar-hidden');
+    saveConfig();
+    applyConfig();
+    renderChips();
+    loadVideos();
+    renderSourceCards();
+    applyToUI();
+    renderAccentSwatches();
+    showToast('Настройки сброшены!', '🔄');
+  });
+
+  // Search
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const q = e.target.value.trim();
+      if (q) showToast(`Поиск: «${q}»`, '🔍');
+    }
+  });
+  document.getElementById('search-btn').addEventListener('click', () => {
+    const q = document.getElementById('search-input').value.trim();
+    if (q) showToast(`Поиск: «${q}»`, '🔍');
+  });
+
+  // Scroll to top
+  const scrollBtn = document.getElementById('scroll-top');
+  window.addEventListener('scroll', () => {
+    scrollBtn.classList.toggle('visible', window.scrollY > 400);
+  });
+  scrollBtn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+
+  // Keyboard shortcut: Ctrl+K → open settings
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); openSettings('appearance'); }
+    if (e.key==='Escape') closeSettings();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
